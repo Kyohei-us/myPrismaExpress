@@ -5,5 +5,10 @@
       "strict": true,
       "lib": ["esnext"],
       "esModuleInterop": true
+    },
+    "typedocOptions": {
+        "entryPoints": ["./src"],
+        "entryPointStrategy": "Expand",
+        "out": "docs"
     }
   }
