@@ -32,11 +32,23 @@ app.get("/users", async (req, res) => {
 
 /*
 Show all posts
+if authorId is present in req.body params,
+show posts by the author
 */
 app.get("/posts", async (req, res) => {
-  const allPosts = await prisma.post.findMany();
-  console.dir(allPosts, { depth: null });
-  res.json(allPosts);
+  if (req.body.authorId){
+    const allPosts = await prisma.post.findMany({
+      where: {
+        authorId: req.body.authorId as number
+      }
+    });
+    console.dir(allPosts, { depth: null });
+    res.json(allPosts);
+  }else{
+    const allPosts = await prisma.post.findMany();
+    console.dir(allPosts, { depth: null });
+    res.json(allPosts);
+  }
 });
 
 /*
