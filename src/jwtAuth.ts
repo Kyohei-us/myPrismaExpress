@@ -4,7 +4,12 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-function signWithKey(userName: string, jwtSecretKey: string) {
+function signWithKey(userName: string, jwtSecretKey: string, max_time_limit?: string) {
+    if (max_time_limit){
+        console.log(`A jwt with time limit of ${max_time_limit} is created!`)
+        return jwt.sign({userName}, jwtSecretKey, {expiresIn: max_time_limit});
+    }
+
     return jwt.sign(userName, jwtSecretKey);
 }
 

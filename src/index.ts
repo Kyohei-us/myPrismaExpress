@@ -99,14 +99,20 @@ app.post("/addPost", async (req, res) => {
 Generate token for user
 */
 app.post("/user/generateUserToken", (req, res) => {
+  let maxTimeLimit = req.query.max_time_limit;
   let jwtSecretKey = process.env.JWT_SECRET_KEY;
   if (!jwtSecretKey) {
     res.send({ message: "jwt secret key is null" })
   } else {
     let userName = req.body.userName as string;
 
-    const token = signWithKey(userName, jwtSecretKey);
-    res.send(token)
+    if (maxTimeLimit){
+      const token = signWithKey(userName, jwtSecretKey, (maxTimeLimit as string));
+      res.send(token)
+    } else {
+      const token = signWithKey(userName, jwtSecretKey);
+      res.send(token)
+    }
   }
 })
 
