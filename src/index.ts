@@ -30,6 +30,21 @@ app.get("/users", async (req, res) => {
   res.json(allUsers);
 });
 
+app.get("/user/:id", async (req, res) => {
+  const id = parseInt(req.params.id);
+  const user = await prisma.user.findUnique({
+    where: {
+      id: id
+    },
+    include: {
+      profile: true,
+      posts: true
+    }
+  });
+  console.log(user);
+  res.json(user);
+})
+
 /*
 Show all posts
 if authorId is present in req.body params,
