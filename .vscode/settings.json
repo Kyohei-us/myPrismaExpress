@@ -1,0 +1,5 @@
+{
+    "yaml.schemas": {
+        "openapi:v3": "file:///Users/kyohei/Documents/myprojects/prismaAPI.nosync/myPrismaExpress/openapi_pe.yaml"
+    }
+}
