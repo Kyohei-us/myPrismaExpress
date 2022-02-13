@@ -4,7 +4,7 @@ import express from "express";
 import dotenv from "dotenv";
 
 import { signWithKey, protectedRoute } from "./jwtAuth"
-import { addPost, addUser, getUserById, parseFields, parseOffsetAndLimit } from "./user";
+import { addPost, addUser, getPostById, getUserById, parseUserFields, parseOffsetAndLimit } from "./user";
 
 const prisma = new PrismaClient();
 const app = express();
@@ -44,7 +44,7 @@ app.get("/user/:id", async (req, res) => {
   try {
 
     const fieldsString = req.query.fields as string;
-    const parsedFields = parseFields(fieldsString);
+    const parsedFields = parseUserFields(fieldsString);
 
     const id = parseInt(req.params.id);
 
@@ -156,6 +156,24 @@ app.get("/posts", async (req, res) => {
   }
 });
 
+app.get("/post/:id", async (req, res) => {
+  try {
+    const id = parseInt(req.params.id);
+
+    const verified = protectedRoute(req);
+    if (!verified) {
+      return res.status(401).send({message: "Access Denied"});
+    }
+
+    const user = await getPostById(id);
+
+    console.log(user);
+    res.json(user);
+  } catch (error) {
+    // Access Denied
+    return res.status(401).send(error);
+  }
+})
 
 /*
 Add user

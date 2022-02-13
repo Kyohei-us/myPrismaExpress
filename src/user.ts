@@ -55,7 +55,21 @@ async function addPost(req: express.Request): Promise<PostNullable> {
     return newPost
 }
 
-const parseFields = (fieldsString: string) => {
+const getPostById = async (id: number) => {
+
+    const post = await prisma.post.findUnique({
+        where: {
+          id: id
+        },
+        include: {
+            author: true
+        }
+      });
+
+    return post;
+}
+
+const parseUserFields = (fieldsString: string) => {
     let fields: string[] = [];
     if (fieldsString) {
       fields = fieldsString.split(',');
@@ -83,4 +97,4 @@ const parseOffsetAndLimit = (req: express.Request) => {
   return {skip, take}
 }
 
-export { addPost, addUser, getUserById, parseFields, parseOffsetAndLimit }
+export { addPost, addUser, getUserById, parseUserFields, parseOffsetAndLimit, getPostById }
