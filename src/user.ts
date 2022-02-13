@@ -20,6 +20,21 @@ async function addUser(req: express.Request) {
     return newUser
 }
 
+const getUserById = async (id: number, withProfile: boolean, withPosts: boolean) => {
+
+    const user = await prisma.user.findUnique({
+        where: {
+          id: id
+        },
+        include: {
+          profile: withProfile,
+          posts: withPosts
+        }
+      });
+
+    return user;
+}
+
 async function addPost(req: express.Request): Promise<PostNullable> {
     let title = req.body.title as string;
     let content = req.body.content as string;
@@ -40,4 +55,32 @@ async function addPost(req: express.Request): Promise<PostNullable> {
     return newPost
 }
 
-export { addPost, addUser }
+const parseFields = (fieldsString: string) => {
+    let fields: string[] = [];
+    if (fieldsString) {
+      fields = fieldsString.split(',');
+    }
+
+    const withProfile = fields.includes("profile") ? true : false;
+    const withPosts = fields.includes("posts") ? true : false;
+
+    return {withProfile, withPosts}
+}
+
+const parseOffsetAndLimit = (req: express.Request) => {
+  // default: 10
+  let skip = 0;
+  if (req.query.offset) {
+    const offset = req.query.offset as string;
+    skip = parseInt(offset)
+  }
+  let take = 10;
+  if (req.query.limit) {
+    const limit = req.query.limit as string;
+    take = parseInt(limit);
+  }
+
+  return {skip, take}
+}
+
+export { addPost, addUser, getUserById, parseFields, parseOffsetAndLimit }

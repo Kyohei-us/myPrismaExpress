@@ -4,7 +4,7 @@ import express from "express";
 import dotenv from "dotenv";
 
 import { signWithKey, protectedRoute } from "./jwtAuth"
-import { addPost, addUser } from "./user";
+import { addPost, addUser, getUserById, parseFields, parseOffsetAndLimit } from "./user";
 
 const prisma = new PrismaClient();
 const app = express();
@@ -23,23 +23,11 @@ Show all users
 */
 app.get("/users", async (req, res) => {
 
-  // default: 10
-  let skip = 0;
-  if (req.query.offset) {
-    const offset = req.query.offset as string;
-    skip = parseInt(offset)
-  }
-  let take = 10;
-  if (req.query.limit) {
-    const limit = req.query.limit as string;
-    take = parseInt(limit);
-  }
-
-  console.log(skip, take)
+  const parsedSkipAndTake = parseOffsetAndLimit(req);
 
   const allUsers = await prisma.user.findMany({
-    skip: skip,
-    take: take,
+    skip: parsedSkipAndTake.skip,
+    take: parsedSkipAndTake.take,
     include: {
       posts: false,
       profile: false,
@@ -54,11 +42,9 @@ app.get("/users", async (req, res) => {
  */
 app.get("/user/:id", async (req, res) => {
   try {
+
     const fieldsString = req.query.fields as string;
-    let fields: string[] = [];
-    if (fieldsString) {
-      fields = fieldsString.split(',');
-    }
+    const parsedFields = parseFields(fieldsString);
 
     const id = parseInt(req.params.id);
 
@@ -67,18 +53,7 @@ app.get("/user/:id", async (req, res) => {
       return res.status(401).send({message: "Access Denied"});
     }
 
-    const withProfile = fields.includes("profile") ? true : false;
-    const withPosts = fields.includes("posts") ? true : false;
-
-    const user = await prisma.user.findUnique({
-      where: {
-        id: id
-      },
-      include: {
-        profile: withProfile,
-        posts: withPosts
-      }
-    });
+    const user = await getUserById(id, parsedFields.withProfile, parsedFields.withPosts);
 
     console.log(user);
     res.json(user);
@@ -159,36 +134,26 @@ show posts by the author
 */
 app.get("/posts", async (req, res) => {
 
-  // default: 10
-  let skip = 0;
-  if (req.query.offset) {
-    const offset = req.query.offset as string;
-    skip = parseInt(offset)
-  }
-  let take = 10;
-  if (req.query.limit) {
-    const limit = req.query.limit as string;
-    take = parseInt(limit);
-  }
+  const parsedSkipAndTake = parseOffsetAndLimit(req);
 
-if (req.body.authorId){
-  const allPosts = await prisma.post.findMany({
-    skip: skip,
-    take: take,
-    where: {
-      authorId: req.body.authorId as number
-    }
-  });
-  console.dir(allPosts, { depth: null });
-  res.json({posts: allPosts, length: allPosts.length});
-}else{
-  const allPosts = await prisma.post.findMany({
-    skip: skip,
-    take: take
-  });
-  console.dir(allPosts, { depth: null });
-  res.json({posts: allPosts, length: allPosts.length});
-}
+  if (req.body.authorId){
+    const allPosts = await prisma.post.findMany({
+      skip: parsedSkipAndTake.skip,
+      take: parsedSkipAndTake.take,
+      where: {
+        authorId: req.body.authorId as number
+      }
+    });
+    console.dir(allPosts, { depth: null });
+    res.json({posts: allPosts, length: allPosts.length});
+  }else{
+    const allPosts = await prisma.post.findMany({
+      skip: parsedSkipAndTake.skip,
+      take: parsedSkipAndTake.take
+    });
+    console.dir(allPosts, { depth: null });
+    res.json({posts: allPosts, length: allPosts.length});
+  }
 });
 
 
