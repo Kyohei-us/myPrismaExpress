@@ -159,6 +159,33 @@ paths:
       responses:
         '201':
           description: CREATED
+  /post/{postId}:
+    get:
+      summary: Get a post by Id.
+      tags:
+        - posts
+      parameters: []
+      responses:
+        '200':
+          description: A JSON of Post.
+          content:
+            application/json:
+              schema: 
+                type: object
+                items:
+                  $ref: '#/components/schemas/Post'
+                example:
+                  id: 1
+                  createdAt: "2022-01-21T18:36:16.763Z"
+                  updatedAt: "2022-01-21T18:36:16.765Z"
+                  title: Title
+                  content: Content
+                  published: false
+                  authorId: 1
+                  author:
+                    id: 1
+                    email: alice@prisma.io
+                    name: Alice
 components:
   schemas:
     User:
