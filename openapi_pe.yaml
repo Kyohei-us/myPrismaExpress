@@ -24,7 +24,19 @@ paths:
         - users
       summary: Get all users.
       description: Returns an array of User model
-      parameters: []
+      parameters:
+        - in: query
+          name: offset
+          schema:
+            type: number
+          required: false
+          description: An offset.
+        - in: query
+          name: limit
+          schema: 
+            type: number
+          required: false
+          description: A limit.
       responses:
         '200':
           description: A JSON array of User model
@@ -39,10 +51,11 @@ paths:
                     name: John Doe
                   - id: 2
                     name: Jane Doe
-  /addUser:
+  /user:
     post:
       tags:
         - users
+      summary: Add a user.
       parameters: []
       requestBody:
         content:
@@ -52,38 +65,77 @@ paths:
       responses:
         '201':
           description: CREATED
-  # /users/{userId}:
-  #   get:
-  #     tags:
-  #       - users
-  #     summary: Get user by ID.
-  #     description: Returns a single User model
-  #     parameters: 
-  #       - name: userId
-  #         in: path
-  #         description: user id
-  #         required: true
-  #         schema:
-  #           type: integer
-  #     responses:
-  #       '200':
-  #         description: A single User model
-  #         content:
-  #           application/json:
-  #             schema: 
-  #               type: object
-  #               items:
-  #                 $ref: '#/components/schemas/User'
-  #               example:
-  #                 id: 1
-  #                 name: John Doe
+  /user/{userId}:
+    get:
+      tags:
+        - users
+      summary: Get a user.
+      parameters:
+        - in: query
+          name: fields
+          schema:
+            type: array
+          required: false
+          description: fields to receive.
+      responses:
+        '200':
+          description: A JSON of User with specified fields.
+          content:
+            application/json:
+              schema: 
+                type: object
+                items:
+                  $ref: '#/components/schemas/User'
+                example:
+                  id: 1
+                  name: John Doe
+                  email: example@yes.com
+  /user/generateUserToken:
+    post:
+      tags:
+        - users
+      summary: Generate a jwt.
+      description: Returns a jwt.
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: string
+              example:
+                userName: Mike
+      responses:
+        '200':
+          description: A jwt string.
+  /user/validateUserToken:
+    get:
+      tags:
+        - users
+      summary: Validate a jwt.
+      description: Validate a jwt.
+      parameters: []
+      responses:
+        '200':
+          description: VALIDATED
   /posts:
     get:
       tags:
         - posts
       summary: Get all posts.
       description: Returns an array of Posts model
-      parameters: []
+      parameters:
+        - in: query
+          name: offset
+          schema:
+            type: number
+          required: false
+          description: An offset.
+        - in: query
+          name: limit
+          schema: 
+            type: number
+          required: false
+          description: A limit.
       responses:
         '200':
           description: A JSON array of Post model
@@ -93,15 +145,9 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Post'
-                # example:
-                #   - id: 1
-                #     name: Apple
-                #     price: 200
-                #   - id: 2
-                #     name: Orange
-                #     price: 150
-  /addPost:
+  /post:
     post:
+      summary: Add a post.
       tags:
         - posts
       parameters: []
