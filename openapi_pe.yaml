@@ -77,6 +77,8 @@ paths:
             type: array
           required: false
           description: fields to receive.
+      security:
+        - bearerAuth: []
       responses:
         '200':
           description: A JSON of User with specified fields.
@@ -114,6 +116,8 @@ paths:
       summary: Validate a jwt.
       description: Validate a jwt.
       parameters: []
+      security:
+        - bearerAuth: []
       responses:
         '200':
           description: VALIDATED
@@ -151,6 +155,8 @@ paths:
       tags:
         - posts
       parameters: []
+      security:
+        - bearerAuth: []
       requestBody:
         content:
           application/json:
@@ -165,6 +171,8 @@ paths:
       tags:
         - posts
       parameters: []
+      security:
+        - bearerAuth: []
       responses:
         '200':
           description: A JSON of Post.
@@ -241,6 +249,11 @@ components:
           type: integer
         author:
           type: object
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT 
 # security: 
 #   - api_key: []
 # tags:

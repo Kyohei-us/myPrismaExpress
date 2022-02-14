@@ -176,7 +176,7 @@ app.get("/post/:id", async (req, res) => {
 })
 
 /*
-Add user
+Add post
 Required body params: title, content, authorId, user token (key is "token header key")
 */
 app.post("/post", async (req, res) => {
