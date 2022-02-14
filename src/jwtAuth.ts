@@ -20,22 +20,25 @@ function verifyWithKey(token: string, jwtSecretKey: string) {
 
 function protectedRoute(req: express.Request): Boolean {
     // Retrieve env vars
-    let tokenHeaderKey = process.env.TOKEN_HEADER_KEY
     let jwtSecretKey = process.env.JWT_SECRET_KEY;
-
     // Check env vars are successfully retrieved
-    if (!tokenHeaderKey || !jwtSecretKey) {
+    if (!jwtSecretKey) {
         return false;
     }
-    // Get token on req header
-    const token = req.header(tokenHeaderKey);
+
+    const bearerHeader = req.headers["authorization"];
+    if (!bearerHeader) {
+        return false;
+    }
+    const bearer = bearerHeader.split(' ');
+    const bearerToken = bearer[1];
 
     // Token is not found on req header
-    if (!token) {
+    if (!bearerToken) {
         return false;
     }
 
-    const verified = verifyWithKey(token, jwtSecretKey);
+    const verified = verifyWithKey(bearerToken, jwtSecretKey);
     if (verified) {
         return true;
     } else {
