@@ -209,6 +209,6 @@ app.get("/", async (req, res) => {
   res.json({ message: "Home Page" })
 })
 
-const server = app.listen(3001, () =>
-  console.log("🚀 Server ready at: http://localhost:3001")
+const server = app.listen(process.env.PORT, () =>
+  console.log("🚀 Server ready at: http://localhost:" + process.env.PORT)
 );
