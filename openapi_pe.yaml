@@ -1,0 +1,266 @@
+openapi: 3.0.0
+info:
+  title: myPrismaExpress
+  description: description of myPrismaExpress
+  # termsOfService: http://example.com/terms/
+  # contact:
+  #   name: API support
+  #   email: support@example.com
+  # license:
+  #   name: Apache 2.0
+  #   url: http://www.apache.org/licenses/LICENSE-2.0.html
+  version: 0.0.1
+# servers:
+#   - url: https://dev.sample-server.com/v1
+#     description: Development server
+#   - url: https://stg.sample-server.com/v1
+#     description: Staging server
+#   - url: https://api.sample-server.com/v1
+#     description: Production server
+paths:
+  /users:
+    get:
+      tags:
+        - users
+      summary: Get all users.
+      description: Returns an array of User model
+      parameters:
+        - in: query
+          name: offset
+          schema:
+            type: number
+          required: false
+          description: An offset.
+        - in: query
+          name: limit
+          schema: 
+            type: number
+          required: false
+          description: A limit.
+      responses:
+        '200':
+          description: A JSON array of User model
+          content:
+            application/json:
+              schema: 
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+                example:
+                  - id: 1
+                    name: John Doe
+                  - id: 2
+                    name: Jane Doe
+  /user:
+    post:
+      tags:
+        - users
+      summary: Add a user.
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        '201':
+          description: CREATED
+  /user/{userId}:
+    get:
+      tags:
+        - users
+      summary: Get a user.
+      parameters:
+        - in: query
+          name: fields
+          schema:
+            type: array
+          required: false
+          description: fields to receive.
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: A JSON of User with specified fields.
+          content:
+            application/json:
+              schema: 
+                type: object
+                items:
+                  $ref: '#/components/schemas/User'
+                example:
+                  id: 1
+                  name: John Doe
+                  email: example@yes.com
+  /user/generateUserToken:
+    post:
+      tags:
+        - users
+      summary: Generate a jwt.
+      description: Returns a jwt.
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: string
+              example:
+                userName: Mike
+      responses:
+        '200':
+          description: A jwt string.
+  /user/validateUserToken:
+    get:
+      tags:
+        - users
+      summary: Validate a jwt.
+      description: Validate a jwt.
+      parameters: []
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: VALIDATED
+  /posts:
+    get:
+      tags:
+        - posts
+      summary: Get all posts.
+      description: Returns an array of Posts model
+      parameters:
+        - in: query
+          name: offset
+          schema:
+            type: number
+          required: false
+          description: An offset.
+        - in: query
+          name: limit
+          schema: 
+            type: number
+          required: false
+          description: A limit.
+      responses:
+        '200':
+          description: A JSON array of Post model
+          content:
+            application/json:
+              schema: 
+                type: array
+                items:
+                  $ref: '#/components/schemas/Post'
+  /post:
+    post:
+      summary: Add a post.
+      tags:
+        - posts
+      parameters: []
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Post'
+      responses:
+        '201':
+          description: CREATED
+  /post/{postId}:
+    get:
+      summary: Get a post by Id.
+      tags:
+        - posts
+      parameters: []
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: A JSON of Post.
+          content:
+            application/json:
+              schema: 
+                type: object
+                items:
+                  $ref: '#/components/schemas/Post'
+                example:
+                  id: 1
+                  createdAt: "2022-01-21T18:36:16.763Z"
+                  updatedAt: "2022-01-21T18:36:16.765Z"
+                  title: Title
+                  content: Content
+                  published: false
+                  authorId: 1
+                  author:
+                    id: 1
+                    email: alice@prisma.io
+                    name: Alice
+components:
+  schemas:
+    User:
+      type: object
+      required:
+        - id
+        - email
+        - name
+      properties:
+        id:
+          type: integer
+          format: int64
+        email:
+          type: string
+        name:
+          type: string
+        posts:
+          type: array
+        profile:
+          type: object
+    Post:
+      type: object
+      required:
+        - id
+        - createdAt
+        - updatedAt
+        - name
+        - title
+        - content
+        - published
+        - authorId
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+        createdAt:
+          type: string
+          format: date
+        updatedAt:
+          type: string
+          format: date
+        name:
+          type: string
+          example: Mike
+        title:
+          type: string
+        content:
+          type: string
+        published:
+          type: boolean
+        authorId:
+          type: integer
+        author:
+          type: object
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT 
+# security: 
+#   - api_key: []
+# tags:
+#   - name: users
+#     description: Access to Users
+#   - name: products
+#     description: Access to Products
+# externalDocs:
+#   description: Find more info here
+#   url: https://example.com
