@@ -8,7 +8,7 @@
     "dev": "nodemon --watch './src/**/*.ts' --exec ts-node --files ./src/index.ts",
     "start": "node dist/index.js",
     "build": "tsc",
-    "postinstall": "npm run build",
+    "postinstall": "npx prisma migrate deploy; npm run build",
     "genTypedoc": "npx typedoc --out docs src/"
   },
   "keywords": [],
