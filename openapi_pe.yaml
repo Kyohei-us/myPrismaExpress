@@ -92,35 +92,6 @@ paths:
                   id: 1
                   name: John Doe
                   email: example@yes.com
-  /user/generateUserToken:
-    post:
-      tags:
-        - users
-      summary: Generate a jwt.
-      description: Returns a jwt.
-      parameters: []
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: string
-              example:
-                userName: Mike
-      responses:
-        '200':
-          description: A jwt string.
-  /user/validateUserToken:
-    get:
-      tags:
-        - users
-      summary: Validate a jwt.
-      description: Validate a jwt.
-      parameters: []
-      security:
-        - bearerAuth: []
-      responses:
-        '200':
-          description: VALIDATED
   /posts:
     get:
       tags:
@@ -194,6 +165,47 @@ paths:
                     id: 1
                     email: alice@prisma.io
                     name: Alice
+  /generateUserToken:
+    post:
+      tags:
+        - general
+      summary: Generate a jwt.
+      description: Returns a jwt.
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: string
+              example:
+                userName: Mike
+      responses:
+        '200':
+          description: A jwt string.
+  /validateUserToken:
+    get:
+      tags:
+        - general
+      summary: Validate a jwt.
+      description: Validate a jwt.
+      parameters: []
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: VALIDATED
+  /invalidateUserToken:
+    get:
+      tags:
+        - general
+      summary: Invalidate a jwt.
+      description: Invalidate a jwt.
+      parameters: []
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: INVALIDATED
 components:
   schemas:
     User:
