@@ -7,6 +7,9 @@ Demo Link: [https://my-prisma-express.herokuapp.com/](https://my-prisma-express.
 `npm run dev`: to run server for development purpose
 `npm run genTypedoc`: to generate documentation with Typedoc
 
+## prisma commands
+`npx prisma migrate dev`: to apply schema change to the database
+
 ## TODO
 To invalidate a jwt, create a blacklist.
 Until the jwt is expired, keep it in the blacklist.
