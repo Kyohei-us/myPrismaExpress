@@ -3,7 +3,7 @@ import cors from "cors";
 import express from "express";
 import dotenv from "dotenv";
 
-import { signWithKey, protectedRoute } from "./jwtAuth"
+import { signWithKey, protectedRoute, invalidateJWT, extractJWT } from "./jwtAuth"
 import { addPost, addUser, getPostById, getUserById, parseUserFields, parseOffsetAndLimit } from "./user";
 
 const prisma = new PrismaClient();
@@ -48,7 +48,7 @@ app.get("/user/:id", async (req, res) => {
 
     const id = parseInt(req.params.id);
 
-    const verified = protectedRoute(req);
+    const verified = await protectedRoute(req);
     if (!verified) {
       return res.status(401).send({message: "Access Denied"});
     }
@@ -78,49 +78,6 @@ app.post("/user", async (req, res) => {
     // Access Denied
     return res.status(401).send(error);
   }
-})
-
-/*
-Generate token for user
-*/
-app.post("/user/generateUserToken", (req, res) => {
-  let maxTimeLimit = req.query.max_time_limit;
-  let jwtSecretKey = process.env.JWT_SECRET_KEY;
-  if (!jwtSecretKey) {
-    res.send({ message: "jwt secret key is null" })
-  } else {
-    let userName = req.body.userName as string;
-
-    if (maxTimeLimit){
-      const token = signWithKey(userName, jwtSecretKey, (maxTimeLimit as string));
-      res.send(token)
-    } else {
-      const token = signWithKey(userName, jwtSecretKey);
-      res.send(token)
-    }
-  }
-})
-
-/*
-Validate user token
-Required body params: user token (key is "token header key")
-*/
-app.get("/user/validateUserToken", (req: express.Request, res: express.Response) => {
-
-  try {
-    const verified: Boolean = protectedRoute(req);
-
-    // Access Denied
-    if (!verified) return res.status(401).send({ message: "Access denied" });
-    else {
-      return res.send("Successfully Verified");
-    }
-
-  } catch (error) {
-    // Access Denied
-    return res.status(401).send(error);
-  }
-
 })
 
 // End of Users
@@ -160,7 +117,7 @@ app.get("/post/:id", async (req, res) => {
   try {
     const id = parseInt(req.params.id);
 
-    const verified = protectedRoute(req);
+    const verified = await protectedRoute(req);
     if (!verified) {
       return res.status(401).send({message: "Access Denied"});
     }
@@ -181,7 +138,7 @@ Required body params: title, content, authorId, user token (key is "token header
 */
 app.post("/post", async (req, res) => {
   try {
-    const verified = protectedRoute(req);
+    const verified = await protectedRoute(req);
 
     // Access Denied
     if (!verified) return res.status(401).send({ message: "Access denied" });
@@ -204,6 +161,67 @@ app.post("/post", async (req, res) => {
 })
 
 // End of Posts
+
+// JWT
+
+/*
+Generate token for user
+*/
+app.post("/generateUserToken", async (req, res) => {
+  let maxTimeLimit = req.query.max_time_limit;
+  let jwtSecretKey = process.env.JWT_SECRET_KEY;
+  if (!jwtSecretKey) {
+    res.send({ message: "jwt secret key is null" })
+  } else {
+    let userName = req.body.userName as string;
+
+    if (maxTimeLimit){
+      const token = await signWithKey(userName, jwtSecretKey, (maxTimeLimit as string));
+      res.send(token)
+    } else {
+      const token = await signWithKey(userName, jwtSecretKey);
+      res.send(token)
+    }
+  }
+})
+
+/*
+Validate user token
+Required body params: user token (key is "token header key")
+*/
+app.get("/validateUserToken", async (req: express.Request, res: express.Response) => {
+  try {
+    const verified: Boolean = await protectedRoute(req);
+
+    // Access Denied
+    if (!verified) return res.status(401).send({ message: "Access denied" });
+    
+    return res.status(200).send("Successfully Verified");
+
+  } catch (error) {
+    // Access Denied
+    return res.status(401).send({message: "error in validation", error: error});
+  }
+})
+
+app.get("/invalidateUserToken", async (req: express.Request, res: express.Response) => {
+
+  try {
+    const extracted = await extractJWT(req);
+
+    if (await invalidateJWT(extracted.bearerToken)){
+      return res.send("Successfully invalidated jwt")
+    } else {
+      return res.status(404).send({ message: "JWT not found" })
+    }
+  } catch (error) {
+    // Access Denied
+    return res.status(404).send({ message: "JWT not found" });
+  }
+
+})
+
+// End JWT
 
 app.get("/", async (req, res) => {
   res.json({ message: "Home Page" })
