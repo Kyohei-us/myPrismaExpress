@@ -5,6 +5,7 @@ import dotenv from "dotenv";
 
 import { signWithKey, protectedRoute, invalidateJWT, extractJWT } from "./jwtAuth"
 import { addPost, addUser, getPostById, getUserById, parseUserFields, parseOffsetAndLimit } from "./user";
+import { PostNullable } from "./types";
 
 const prisma = new PrismaClient();
 const app = express();
@@ -145,7 +146,7 @@ app.post("/post", async (req, res) => {
     else {
       // add post method here
       console.log("Adding post...");
-      let newPost = await addPost(req);
+      let newPost: PostNullable = await addPost(req);
       if (newPost) {
         console.log("Post added");
         return res.send({ title: newPost.title });
@@ -179,7 +180,7 @@ app.post("/generateUserToken", async (req, res) => {
       const token = await signWithKey(userName, jwtSecretKey, (maxTimeLimit as string));
       res.send(token)
     } else {
-      const token = await signWithKey(userName, jwtSecretKey);
+      const token = await signWithKey(userName, jwtSecretKey, "");
       res.send(token)
     }
   }
