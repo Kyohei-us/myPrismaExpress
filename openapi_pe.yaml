@@ -165,6 +165,34 @@ paths:
                     id: 1
                     email: alice@prisma.io
                     name: Alice
+  /categories:
+    get:
+      tags:
+        - categories
+      summary: Get all categories.
+      description: Returns an array of Category model
+      parameters:
+        - in: query
+          name: offset
+          schema:
+            type: number
+          required: false
+          description: An offset.
+        - in: query
+          name: limit
+          schema: 
+            type: number
+          required: false
+          description: A limit.
+      responses:
+        '200':
+          description: A JSON array of Category model
+          content:
+            application/json:
+              schema: 
+                type: array
+                items:
+                  $ref: '#/components/schemas/Category'
   /generateUserToken:
     post:
       tags:
@@ -261,6 +289,18 @@ components:
           type: integer
         author:
           type: object
+    Category:
+      type: object
+      required:
+        - id
+        - name
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+          example: Sci-Fi
   securitySchemes:
     bearerAuth:
       type: http
