@@ -3,8 +3,20 @@ import cors from "cors";
 import express from "express";
 import dotenv from "dotenv";
 
-import { signWithKey, protectedRoute, invalidateJWT, extractJWT } from "./jwtAuth"
-import { addPost, addUser, getPostById, getUserById, parseUserFields, parseOffsetAndLimit } from "./user";
+import {
+  signWithKey,
+  protectedRoute,
+  invalidateJWT,
+  extractJWT,
+} from "./jwtAuth";
+import {
+  addPost,
+  addUser,
+  getPostById,
+  getUserById,
+  parseUserFields,
+  parseOffsetAndLimit,
+} from "./user";
 import { JWToken, PostNullable } from "./types";
 
 const prisma = new PrismaClient();
@@ -23,7 +35,6 @@ dotenv.config();
 Show all users
 */
 app.get("/users", async (req, res) => {
-
   const parsedSkipAndTake = parseOffsetAndLimit(req);
 
   const allUsers = await prisma.user.findMany({
@@ -35,7 +46,7 @@ app.get("/users", async (req, res) => {
     },
   });
   console.dir(allUsers, { depth: null });
-  res.json({users: allUsers, length: allUsers.length});
+  res.json({ users: allUsers, length: allUsers.length });
 });
 
 /**
@@ -43,7 +54,6 @@ app.get("/users", async (req, res) => {
  */
 app.get("/user/:id", async (req, res) => {
   try {
-
     const fieldsString = req.query.fields as string;
     const parsedFields = parseUserFields(fieldsString);
 
@@ -51,10 +61,14 @@ app.get("/user/:id", async (req, res) => {
 
     const verified = await protectedRoute(req);
     if (!verified) {
-      return res.status(401).send({message: "Access Denied"});
+      return res.status(401).send({ message: "Access Denied" });
     }
 
-    const user = await getUserById(id, parsedFields.withProfile, parsedFields.withPosts);
+    const user = await getUserById(
+      id,
+      parsedFields.withProfile,
+      parsedFields.withPosts
+    );
 
     console.log(user);
     res.json(user);
@@ -62,8 +76,7 @@ app.get("/user/:id", async (req, res) => {
     // Access Denied
     return res.status(401).send(error);
   }
-
-})
+});
 
 /*
 Add user
@@ -79,7 +92,7 @@ app.post("/user", async (req, res) => {
     // Access Denied
     return res.status(401).send(error);
   }
-})
+});
 
 // End of Users
 
@@ -91,26 +104,25 @@ if authorId is present in req.body params,
 show posts by the author
 */
 app.get("/posts", async (req, res) => {
-
   const parsedSkipAndTake = parseOffsetAndLimit(req);
 
-  if (req.body.authorId){
+  if (req.body.authorId) {
     const allPosts = await prisma.post.findMany({
       skip: parsedSkipAndTake.skip,
       take: parsedSkipAndTake.take,
       where: {
-        authorId: req.body.authorId as number
-      }
+        authorId: req.body.authorId as number,
+      },
     });
     console.dir(allPosts, { depth: null });
-    res.json({posts: allPosts, length: allPosts.length});
-  }else{
+    res.json({ posts: allPosts, length: allPosts.length });
+  } else {
     const allPosts = await prisma.post.findMany({
       skip: parsedSkipAndTake.skip,
-      take: parsedSkipAndTake.take
+      take: parsedSkipAndTake.take,
     });
     console.dir(allPosts, { depth: null });
-    res.json({posts: allPosts, length: allPosts.length});
+    res.json({ posts: allPosts, length: allPosts.length });
   }
 });
 
@@ -120,7 +132,7 @@ app.get("/post/:id", async (req, res) => {
 
     const verified = await protectedRoute(req);
     if (!verified) {
-      return res.status(401).send({message: "Access Denied"});
+      return res.status(401).send({ message: "Access Denied" });
     }
 
     const user = await getPostById(id);
@@ -131,7 +143,7 @@ app.get("/post/:id", async (req, res) => {
     // Access Denied
     return res.status(401).send(error);
   }
-})
+});
 
 /*
 Add post
@@ -152,14 +164,14 @@ app.post("/post", async (req, res) => {
         return res.send({ title: newPost.title });
       } else {
         console.log("Post is not added");
-        return res.send({ message: "Post is not added" })
+        return res.send({ message: "Post is not added" });
       }
     }
   } catch (error) {
     // Access Denied
     return res.status(401).send(error);
   }
-})
+});
 
 // End of Posts
 
@@ -172,62 +184,71 @@ app.post("/generateUserToken", async (req, res) => {
   let maxTimeLimit = req.query.max_time_limit;
   let jwtSecretKey = process.env.JWT_SECRET_KEY;
   if (!jwtSecretKey) {
-    res.send({ message: "jwt secret key is null" })
+    res.send({ message: "jwt secret key is null" });
   } else {
     let userName = req.body.userName as string;
 
-    if (maxTimeLimit){
-      const token = await signWithKey(userName, jwtSecretKey, (maxTimeLimit as string));
-      res.send(token)
+    if (maxTimeLimit) {
+      const token = await signWithKey(
+        userName,
+        jwtSecretKey,
+        maxTimeLimit as string
+      );
+      res.send(token);
     } else {
       const token = await signWithKey(userName, jwtSecretKey, "");
-      res.send(token)
+      res.send(token);
     }
   }
-})
+});
 
 /*
 Validate user token
 Required body params: user token (key is "token header key")
 */
-app.get("/validateUserToken", async (req: express.Request, res: express.Response) => {
-  try {
-    const verified: Boolean = await protectedRoute(req);
+app.get(
+  "/validateUserToken",
+  async (req: express.Request, res: express.Response) => {
+    try {
+      const verified: Boolean = await protectedRoute(req);
 
-    // Access Denied
-    if (!verified) return res.status(401).send({ message: "Access denied" });
-    
-    return res.status(200).send("Successfully Verified");
+      // Access Denied
+      if (!verified) return res.status(401).send({ message: "Access denied" });
 
-  } catch (error) {
-    // Access Denied
-    return res.status(401).send({message: "error in validation", error: error});
-  }
-})
-
-app.get("/invalidateUserToken", async (req: express.Request, res: express.Response) => {
-
-  try {
-    const extracted = await extractJWT(req);
-
-    const token: JWToken = {token: extracted.bearerToken};
-    if (await invalidateJWT(token)){
-      return res.send("Successfully invalidated jwt")
-    } else {
-      return res.status(404).send({ message: "JWT not found" })
+      return res.status(200).send("Successfully Verified");
+    } catch (error) {
+      // Access Denied
+      return res
+        .status(401)
+        .send({ message: "error in validation", error: error });
     }
-  } catch (error) {
-    // Access Denied
-    return res.status(404).send({ message: "JWT not found" });
   }
+);
 
-})
+app.get(
+  "/invalidateUserToken",
+  async (req: express.Request, res: express.Response) => {
+    try {
+      const extracted = await extractJWT(req);
+
+      const token: JWToken = { token: extracted.bearerToken };
+      if (await invalidateJWT(token)) {
+        return res.send("Successfully invalidated jwt");
+      } else {
+        return res.status(404).send({ message: "JWT not found" });
+      }
+    } catch (error) {
+      // Access Denied
+      return res.status(404).send({ message: "JWT not found" });
+    }
+  }
+);
 
 // End JWT
 
 app.get("/", async (req, res) => {
-  res.json({ message: "Home Page" })
-})
+  res.json({ message: "Home Page" });
+});
 
 const server = app.listen(process.env.PORT, () =>
   console.log("🚀 Server ready at: http://localhost:" + process.env.PORT)

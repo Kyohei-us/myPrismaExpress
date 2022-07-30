@@ -3,7 +3,7 @@ import { Post } from "@prisma/client";
 type PostNullable = Post | undefined;
 
 type JWToken = {
-    token: string;
-}
+  token: string;
+};
 
-export { PostNullable, JWToken }
+export { PostNullable, JWToken };
