@@ -7,8 +7,22 @@ dotenv.config();
 
 const prisma = new PrismaClient();
 
-async function signWithKey(userName: string, jwtSecretKey: string, max_time_limit?: string) {
-    if (max_time_limit){
+function isNumeric(num: string): boolean {
+    if (!isNaN(Number(num)) && num !== "") {
+        return true;
+    }
+    return false;
+}
+
+/**
+ * 
+ * @param userName 
+ * @param jwtSecretKey 
+ * @param max_time_limit - number in milliseconds as string
+ * @returns 
+ */
+async function signWithKey(userName: string, jwtSecretKey: string, max_time_limit: string): Promise<string> {
+    if (isNumeric(max_time_limit)){
         console.log(`A jwt with time limit of ${max_time_limit} is created!`)
         const jwt_string = jwt.sign({userName}, jwtSecretKey, {expiresIn: max_time_limit});
         const new_jwt = await prisma.jwtoken.create({
