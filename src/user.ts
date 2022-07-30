@@ -1,10 +1,9 @@
 import express from "express";
-import { PrismaClient } from "@prisma/client";
-import { PostNullable } from "./types";
+import { PrismaClient, User } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
-async function addUser(req: express.Request) {
+async function addUser(req: express.Request): Promise<User> {
   let email = req.body.email;
   let name = req.body.name;
 
@@ -38,39 +37,6 @@ const getUserById = async (
   return user;
 };
 
-async function addPost(req: express.Request): Promise<PostNullable> {
-  let title = req.body.title as string;
-  let content = req.body.content as string;
-  let authorId = req.body.authorId as number;
-
-  if (!title || !content || !authorId) {
-    return undefined;
-  }
-
-  const newPost = await prisma.post.create({
-    data: {
-      title,
-      content,
-      authorId,
-    },
-  });
-
-  return newPost;
-}
-
-const getPostById = async (id: number) => {
-  const post = await prisma.post.findUnique({
-    where: {
-      id: id,
-    },
-    include: {
-      author: true,
-    },
-  });
-
-  return post;
-};
-
 const parseUserFields = (fieldsString: string) => {
   let fields: string[] = [];
   if (fieldsString) {
@@ -100,10 +66,8 @@ const parseOffsetAndLimit = (req: express.Request) => {
 };
 
 export {
-  addPost,
   addUser,
   getUserById,
   parseUserFields,
-  parseOffsetAndLimit,
-  getPostById,
+  parseOffsetAndLimit
 };

@@ -1,4 +1,4 @@
-import { Post, PrismaClient } from "@prisma/client";
+import { PrismaClient } from "@prisma/client";
 import cors from "cors";
 import express from "express";
 import dotenv from "dotenv";
@@ -10,14 +10,13 @@ import {
   extractJWT,
 } from "./jwtAuth";
 import {
-  addPost,
   addUser,
-  getPostById,
   getUserById,
   parseUserFields,
   parseOffsetAndLimit,
 } from "./user";
 import { JWToken, PostNullable } from "./types";
+import { addPost, getPostById } from "./post";
 
 const prisma = new PrismaClient();
 const app = express();
@@ -29,7 +28,7 @@ dotenv.config();
 
 // routes here
 
-// Users
+// User
 
 /*
 Show all users
@@ -94,9 +93,9 @@ app.post("/user", async (req, res) => {
   }
 });
 
-// End of Users
+// End of User
 
-// Posts
+// Post
 
 /*
 Show all posts
@@ -113,6 +112,9 @@ app.get("/posts", async (req, res) => {
       where: {
         authorId: req.body.authorId as number,
       },
+      include: {
+        categories: true
+      }
     });
     console.dir(allPosts, { depth: null });
     res.json({ posts: allPosts, length: allPosts.length });
@@ -173,7 +175,25 @@ app.post("/post", async (req, res) => {
   }
 });
 
-// End of Posts
+// End of Post
+
+// Category
+
+app.get("/categories", async (req, res) => {
+  const parsedSkipAndTake = parseOffsetAndLimit(req);
+
+  const allCategories = await prisma.category.findMany({
+    skip: parsedSkipAndTake.skip,
+    take: parsedSkipAndTake.take,
+    include: {
+      posts: true
+    }
+  });
+  console.dir(allCategories, { depth: null });
+  res.json({ posts: allCategories, length: allCategories.length });
+})
+
+// End of Category
 
 // JWT
 
