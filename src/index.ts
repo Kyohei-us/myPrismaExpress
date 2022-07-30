@@ -5,7 +5,7 @@ import dotenv from "dotenv";
 
 import { signWithKey, protectedRoute, invalidateJWT, extractJWT } from "./jwtAuth"
 import { addPost, addUser, getPostById, getUserById, parseUserFields, parseOffsetAndLimit } from "./user";
-import { PostNullable } from "./types";
+import { JWToken, PostNullable } from "./types";
 
 const prisma = new PrismaClient();
 const app = express();
@@ -210,7 +210,8 @@ app.get("/invalidateUserToken", async (req: express.Request, res: express.Respon
   try {
     const extracted = await extractJWT(req);
 
-    if (await invalidateJWT(extracted.bearerToken)){
+    const token: JWToken = {token: extracted.bearerToken};
+    if (await invalidateJWT(token)){
       return res.send("Successfully invalidated jwt")
     } else {
       return res.status(404).send({ message: "JWT not found" })
